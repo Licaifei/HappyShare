@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <link href="style/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+        <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+        <link href="lib/bootstrap/css/bootstrap-vertical-menu.css" rel="stylesheet" type="text/css"/>
+        <link href="lib/openlayers/css/ol.css" rel="stylesheet" type="text/css"/>
+        <link href="style/style.css" rel="stylesheet" type="text/css"/>
+
+        <script src="lib/JQuery/jquery.min.js" type="text/javascript"></script>
+        <script src="lib/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+        <script src="lib/openlayers/build/ol.js" type="text/javascript"></script>
+        <script src="js/global.js" type="text/javascript"></script>
+        <script src="js/Connector.js" type="text/javascript"></script>
+        <script src="js/coordtransform.js" type="text/javascript"></script>
+        <script src="js/Mapcontrol.js" type="text/javascript"></script>
+
+        <script>
+
+            $(document).ready(function () {
+                /*
+                 * bkmap:GAODE,BAIDU,GOOGLE_SATELLITE,GOOGLE_HYBRID
+                 */
+                var shei = screen.height;
+                $(".htmleaf-content").css({
+                    height: shei
+                });
+
+                mapcontrol = new MapControl({
+                    target: "mainmap",
+                    center: [112.9357, 28.15273],
+                    zoom: 16,
+                    bkmapname: "BAIDU",
+                    transform: new Coordtransform()
+                });
+
+            });
+        </script>
+    </head>
+    <body>
+        <nav class="navbar navbar-vertical-left">
+            <ul class="nav navbar-nav">
+                <li>
+                    <a href>
+                        <i class="fa fa-fw fa-lg fa-home"></i> 
+                        <span>首页</span>
+                    </a>
+                </li>
+                <li>
+                    <a href>
+                        <i class="fa fa-fw fa-lg fa-download "></i> 
+                        <span>发布</span>
+                    </a>
+                </li>
+                <li>
+                    <a href>
+                        <i class="fa fa-fw fa-lg fa-drivers-license-o"></i> 
+                        <span>资料</span>
+                    </a>
+                </li>
+                <li>
+                    <a href>
+                        <i class="fa fa-fw fa-lg fa-desktop"></i> 
+                        <span>查看所有</span>
+                    </a>
+                </li>
+                <li>
+                    <a href>
+                        <i class="fa fa-fw fa-lg fa-comments-o"></i> 
+                        <span>私信</span>
+                    </a>
+                </li>
+                <li>
+                    <a href>
+                        <i class="fa fa-fw fa-lg fa-exit"></i> 
+                        <span>退出</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        <div class="htmleaf-container">
+            <header class="htmleaf-header">
+                <h1>LeShare</h1>
+            </header>
+            <div class="htmleaf-content bgcolor-8">
+                <div id="mainmap">
+                    
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
