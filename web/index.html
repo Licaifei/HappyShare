@@ -7,19 +7,27 @@
 
         <title>Home</title>
 
+        <link href="style/font-awesome.min.css" rel="stylesheet" type="text/css"/>
         <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+        <link href="lib/bootstrap/css/bootstrap-vertical-menu.css" rel="stylesheet" type="text/css"/>
         <link href="lib/openlayers/css/ol.css" rel="stylesheet" type="text/css"/>
         <link href="style/style.css" rel="stylesheet" type="text/css"/>
 
         <script src="lib/JQuery/jquery.min.js" type="text/javascript"></script>
         <script src="lib/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
         <script src="lib/openlayers/build/ol.js" type="text/javascript"></script>
-
         <script src="js/global.js" type="text/javascript"></script>
-        <script src="js/mapcontrol.js" type="text/javascript"></script>
+        <script src="js/Connector.js" type="text/javascript"></script>
+        <script src="js/coordtransform.js" type="text/javascript"></script>
+        <script src="js/Mapcontrol.js" type="text/javascript"></script>
         <script>
             $(document).ready(function () {
-                var m_mapcontrol = new MapControl({
+                var shei = screen.height;
+                $(".htmleaf-content").css({
+                    height: shei
+                });
+                
+                m_mapcontrol = new MapControl({
                     target: "mainmap",
                     center: [112.9357, 28.15273],
                     zoom: 16,
@@ -30,19 +38,15 @@
         </script>
     </head>
     <body>
-        <header>
-            <div id="navbar-section" class="navbar navbar-default navbar-static-top navbar-sticky">
-                <h2>    Welcome to your LeShai profile</h2>
-            </div>
-            <div id="signdiv">
-                <input id="login" type="button" value="登陆" />
-                <input id="regist" type="button" value="注册" />
-            </div>  
-
-        </header>
-        <div class="contont">
-            <div id="mainmap">
-
+        <div class="htmleaf-container">
+            <header class="htmleaf-header">
+                <h1>LeShare</h1>
+                <div>login</div>
+            </header>
+            <div class="htmleaf-content bgcolor-8">
+                <div id="mainmap">
+                    
+                </div>
             </div>
         </div>
     </body>
