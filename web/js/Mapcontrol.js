@@ -3,7 +3,7 @@
  * wgs84 4326
  * baidu gaode pianyi 4326
  */
-
+/* global ol */
 
 MapControl = function (opts) {
     var me = this;
