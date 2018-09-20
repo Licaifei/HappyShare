@@ -82,6 +82,9 @@ MapControl.prototype._initolmap = function () {
         left : 'auto',
         right: '.5em'
     });
+    $('.ol-touch .ol-control').css({
+        'font-size' : '1.0em'
+    });
     
     me.olmap.getView().on("change", function (e) {
         me.updateBackgroundMap();
