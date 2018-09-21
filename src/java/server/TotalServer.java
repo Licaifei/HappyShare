@@ -7,6 +7,7 @@ package server;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -47,7 +48,24 @@ public class TotalServer extends HttpServlet {
                 out.print(responseobj.toString());
                 return;
             }
+           JSONObject json = new JSONObject(requestStr);
+            String[] strArr = json.getString("type").split("_");
+            String type = strArr[0];
+            connectPG sv = null;
+            if(type.equals("Point")){
+                sv = new getPoint();
+            }
+            
+            sv.setRequest(json);
+            sv.connectDB();
+            sv.run();
+            sv.closeDB();
+            out.print(sv.getResponse().toString());
         } catch (JSONException ex) {
+            Logger.getLogger(TotalServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(TotalServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
             Logger.getLogger(TotalServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
