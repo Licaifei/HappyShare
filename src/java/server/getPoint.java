@@ -46,9 +46,7 @@ public class getPoint extends connectPG {
             JSONObject data = new JSONObject();
             data.append("geoList", pointList);
             setResponse(true, "获取首页所需要的5A景区的信息", data);
-        } catch (SQLException ex) {
-            Logger.getLogger(getPoint.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (JSONException ex) {
+        } catch (SQLException | JSONException ex) {
             Logger.getLogger(getPoint.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
