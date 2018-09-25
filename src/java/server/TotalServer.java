@@ -51,9 +51,13 @@ public class TotalServer extends HttpServlet {
            JSONObject json = new JSONObject(requestStr);
             String[] strArr = json.getString("type").split("_");
             String type = strArr[0];
+            
             connectPG sv = null;
             if(type.equals("Point")){
                 sv = new getPoint();
+            }
+            else if(type.equals("USER")){
+                sv = new UserServer();
             }
             
             sv.setRequest(json);
@@ -61,11 +65,7 @@ public class TotalServer extends HttpServlet {
             sv.run();
             sv.closeDB();
             out.print(sv.getResponse().toString());
-        } catch (JSONException ex) {
-            Logger.getLogger(TotalServer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(TotalServer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
+        } catch (JSONException | ClassNotFoundException | SQLException ex) {
             Logger.getLogger(TotalServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
