@@ -42,7 +42,17 @@ and open the template in the editor.
                     bkmapname: "BAIDU",
                     transform: new Coordtransform()
                 });
+                
+                 _CURRECT_USERNAME = sessionStorage["name"];
 
+                if (typeof (_CURRECT_USERNAME) === "undefined")
+                {
+                    window.location.href = "index.html";
+                }
+                else
+                {
+                    $(".user").html("<span>" + _CURRECT_USERNAME+ "</span>");
+                }
             });
         </script>
     </head>
@@ -52,12 +62,12 @@ and open the template in the editor.
                 <li>
                     <a id="user" href>
                         <!--<i class="fa fa-fw fa-lg fa-home"></i>--> 
-                        <img src="" />
+                        <img src="" id="uesrname"/>
                         <span>USER</span>
                     </a>
                 </li>
                 <li>
-                    <a href>
+                    <a href="index.html">
                         <i class="fa fa-fw fa-lg fa-home"></i> 
                         <span>首页</span>
                     </a>

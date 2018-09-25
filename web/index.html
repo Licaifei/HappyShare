@@ -11,28 +11,32 @@
         <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
         <link href="lib/bootstrap/css/bootstrap-vertical-menu.css" rel="stylesheet" type="text/css"/>
         <link href="lib/openlayers/css/ol.css" rel="stylesheet" type="text/css"/>
+
+        <link href="lib/izimodel/css/iziModal.min.css" rel="stylesheet" type="text/css"/>
         <link href="style/style.css" rel="stylesheet" type="text/css"/>
         
         <script src="lib/echarts.min.js" type="text/javascript"></script>
         <script src="lib/JQuery/jquery.min.js" type="text/javascript"></script>
+        <script src="lib/izimodel/js/iziModal.min.js" type="text/javascript"></script>
+
         <script src="lib/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
         <script src="lib/openlayers/build/ol.js" type="text/javascript"></script>
         <script src="js/global.js" type="text/javascript"></script>
         <script src="js/Connector.js" type="text/javascript"></script>
         <script src="js/coordtransform.js" type="text/javascript"></script>
         <script src="js/Mapcontrol.js" type="text/javascript"></script>
+        <script src="lib/notice/notice.js" type="text/javascript"></script>
         <script>
             $(document).ready(function () {
                 var shei = screen.height;
                 $(".htmleaf-content").css({
                     height: shei
                 });
-                
+
                 m_mapcontrol = new MapControl({
                     target: "mainmap",
-                    center: [112.9357, 26],
-                    zoom: 5,
-                    bkmapname: "BAIDU",
+                    center: [112.9357, 28.15273],
+                    zoom: 16,
                     transform: new Coordtransform()
                 });
                 
@@ -42,7 +46,124 @@
                         m_mapcontrol.panorama.hide();
                     }
                 } 
+
+                _CURRECT_USERNAME = sessionStorage["name"];
+
+                if (typeof (_CURRECT_USERNAME) === "undefined")
+                {
+                    _CURRECT_USERNAME = "未登录";
+                    $('.headright').append($('<a href="" class="trigger"> 登录</a> / <a>注册</a> </a>'));
+                } else
+                {
+                    m_notice = new NoticeJs({
+                        text: '欢迎您使用乐晒系统',
+                        position: 'topRight',
+                        animation: {
+                            open: 'animated bounceInRight',
+                            close: 'animated bounceOutLeft'
+                        }
+                    }).show();
+
+                    $('.headright').append($('<a href="" onclick="destroyuser()"> 切换用户 </a>'));
+                }
+
+
+                $("#target").iziModal({
+                    title: "乐晒`分享你的旅途",
+                    iconClass: 'icon-announcement',
+                    padding: 20,
+                    overlayClose: false,
+                    width: 460,
+                    autoOpen: false,
+                    overlayColor: 'rgba(0, 0, 0, 0.6)',
+                    onOpened: function () {
+                        console.log('onOpened');
+                    },
+                    onClosed: function () {
+                        console.log('onClosed');
+                    }
+                });
+
+                $(document).on('click', '.trigger', function (event) {
+                    event.preventDefault();
+                    $('#target').iziModal('open', this);
+                });
+                $("#login").on('click', function () {
+                    loginuser();
+                });
             });
+
+            function destroyuser()
+            {
+                sessionStorage.clear();
+                new NoticeJs({
+                    text: '已退出登录！',
+                    type: 'warning',
+                    position: 'topCenter',
+                    animation: {
+                        open: 'animated bounceInRight',
+                        close: 'animated bounceOutLeft'
+                    }
+                }).show();
+                $('.headright').empty();
+                $('.headright').append($('<a href="" class="trigger"> 登录</a> / <a>注册</a> </a>'));
+            }
+
+            function loginuser()
+            {
+                var name = $("#user_name").val();
+                var pass = $("#password").val();
+                Connector({
+                    url: 'MyServer',
+                    params: {
+                        'type': 'USER_LOGIN',
+                        'data': {
+                            'username': name,
+                            'password': pass
+                        }
+                    },
+                    success: function (json) {
+                        // alert("登录成功！");
+                        new NoticeJs({
+                            text: '登陆成功',
+                            position: 'topRight',
+                            animation: {
+                                open: 'animated bounceInRight',
+                                close: 'animated bounceOutLeft'
+                            }
+                        }).show();
+                        sessionStorage['name'] = name;
+//                        $('#target').iziModal('close', this);
+//                        // 显示用户登录后状态
+//                        $('.headright').empty();
+//                        $('.headright').append($('<a onclick="destroyuser()"> 切换用户 </a>'));
+                        window.location.href = "personal.html";
+                    },
+                    failure(json) {
+                        new NoticeJs({
+                            text: '登录失败，请检查用户名或者密码后重试！',
+                            position: 'middleCenter',
+                            type: 'error',
+                            animation: {
+                                open: 'animated bounceIn',
+                                close: 'animated bounceOut'
+                            }
+                        }).show();
+                    }
+                });
+            }
+
+            function searchToggle(obj, evt) {
+                var container = $(obj).closest('.search-wrapper');
+                if (!container.hasClass('active')) {
+                    container.addClass('active');
+                    evt.preventDefault();
+                } else if (container.hasClass('active') && $(obj).closest('.input-holder').length === 0) {
+                    container.removeClass('active');
+                    // clear input
+                    container.find('.search-input').val('');
+                }
+            }
         </script>
     </head>
     <body>
@@ -51,16 +172,42 @@
                 <div class="headleft">
                     <h2>LeShare</h2>
                 </div>
-                
+
                 <div class="headright">
-                    <a>登录</a>
-                    <a>注册</a></div>
+
+                </div>
             </header>
             <div class="htmleaf-content bgcolor-8">
                 <div id="mainmap">
-                    
+                    <div class="search-wrapper" style="z-index: 999; bottom: auto; right: auto; top: 10px; left: 10px;">
+                        <div class="input-holder" style=" left: 0px; position: absolute;">
+                            <input type="text" class="search-input" placeholder="搜索景点...">
+                            <button class="search-icon" onclick="searchToggle(this, event);"><span></span></button>
+                        </div>
+                        <span class="close" onclick="searchToggle(this, event);" style=" z-index: 999; color: black; "></span>
+                    </div>
                 </div>
             </div>
+        </div>
+        <div id="target" class="login-page" style="height: 360px;">
+            <div id="login_form" class="form">
+                <form class="login-form">
+                    <div class="input-group" style="padding: 10px;">
+                        <span class="input-group-addon" id="basic-addon1">用户： </span>
+                        <input type="text" id="user_name" class="form-control" placeholder="Username" aria-describedby="basic-addon1">
+                    </div>
+                    <div class="input-group" style="padding: 10px;">
+                        <span class="input-group-addon" id="basic-addon2">密码： </span>
+                        <input type="password" id="password" class="form-cbtnontrol" placeholder="Password" aria-describedby="basic-addon2">
+                    </div>
+                    <br/>
+                    <footer>
+                        <button data-izimodal-close="" class="btn btn-default login-btn">取消</button>
+                        <button type="button" class="btn btn-info login-btn" id="login" >登录</button>        
+                    </footer>
+                    <p class="message">还没有账户? <a href="#">立刻创建</a></p>
+                </form>
+            </div>       
         </div>
     </body>
 </html>
