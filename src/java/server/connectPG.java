@@ -51,7 +51,7 @@ public abstract class connectPG {
 
     public void connectDB() throws ClassNotFoundException {
         Class.forName("org.postgresql.Driver");
-        String url = "jdbc:postgresql://127.0.0.1/gissecdev";
+        String url = "jdbc:postgresql://127.0.0.1/happyshare";
         Properties props = new Properties();
         props.setProperty("user", "postgres");
         props.setProperty("password", "123456");
