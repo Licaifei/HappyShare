@@ -25,6 +25,7 @@ MapControl = function (opts) {
     me._init();
 };
 
+MapControl.prototype.panorama = null;
 MapControl.prototype._init = function () {
     var me = this;
 
@@ -68,6 +69,8 @@ MapControl.prototype._initBKmap = function () {
 MapControl.prototype.initbaidumap = function () {
     var me = this;
     me.bkmap = new BMap.Map(me.bkmapID);          // 创建地图实例  
+    me.panorama = new BMap.Panorama(me.bkmapID); 
+    me.panorama.setPov({heading: -40, pitch: 6});   //创建全景地图
     var mycenter = me.opts.center;
 
     var bgc = me.opts.transform.wgs84tobd09(mycenter[0], mycenter[1]);
@@ -108,18 +111,14 @@ MapControl.prototype.getPointsInfo = function () {
 };
 
 MapControl.prototype.showPoint = function(information) {
-//    var geo = information[0];
-//    geo = geo.geometry[0];
-//    alert(geo);
     var me = this;
     var points = me.handelPointFormat(information);
-    //创建小狐狸
     for(var i = 0; i < points.length; i++) {
         var scenicName = information[i].scenicname[0];
         var pt = new BMap.Point(points[i][0], points[i][1]);
-        var myIcon = new BMap.Icon("http://lbsyun.baidu.com/jsdemo/img/fox.gif", new BMap.Size(150, 150));
-        //, {icon: myIcon}
-        var marker = new BMap.Marker(pt);  // 创建标注   
+        var myIcon = new BMap.Icon("image/point-of-interest-32.png", new BMap.Size(32, 32));
+        var marker = new BMap.Marker(pt, {icon: myIcon});  // 创建标注  
+//        marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
         me.bkmap.addOverlay(marker);              // 将标注添加到地图中
         me.addClickHandler(scenicName,marker);   //添加监听事件      
     }   
@@ -128,9 +127,28 @@ MapControl.prototype.showPoint = function(information) {
 //处理监听事件
 MapControl.prototype.addClickHandler = function (content, marker) {
     var me = this;
-    marker.addEventListener("click", function (e) {
+    marker.addEventListener("mouseover", function (e) {
         me.showPointInfo(content, e);
+    });    
+    marker.addEventListener("mouseout", function (e) {
+        me.delPointInfo(e);
     });
+    marker.addEventListener("click", function (e) {
+        me.bdPanorama(e);
+    });
+};
+
+MapControl.prototype.bdPanorama = function(e) {
+    var me = this;
+    var p = e.target;
+    var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+    me.panorama.setPosition(point); 
+    me.panorama.show();
+};
+
+MapControl.prototype.delPointInfo = function(e) {
+    var me = this;
+    me.bkmap.closeInfoWindow();
 };
 
 MapControl.prototype.showPointInfo = function(content, e){
