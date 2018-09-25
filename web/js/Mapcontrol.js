@@ -121,22 +121,25 @@ MapControl.prototype.showPoint = function(information) {
         //, {icon: myIcon}
         var marker = new BMap.Marker(pt);  // 创建标注   
         me.bkmap.addOverlay(marker);              // 将标注添加到地图中
-        marker.addEventListener("click",function(){
-            me.showPointInfo(this, scenicName);
-        });   //添加监听事件
-        
-    }
-    
+        me.addClickHandler(scenicName,marker);   //添加监听事件      
+    }   
 };
 
-MapControl.prototype.showPointInfo = function(thisMarker, data){
+//处理监听事件
+MapControl.prototype.addClickHandler = function (content, marker) {
+    var me = this;
+    marker.addEventListener("click", function (e) {
+        me.showPointInfo(content, e);
+    });
+};
+
+MapControl.prototype.showPointInfo = function(content, e){
     //获取点的信息
-    var sContent = 
-    '<ul style="margin:0 0 5px 0;padding:0.2em 0">'  
-    +'<li style="line-height: 26px;font-size: 15px;">'  
-    +'<span style="width: 50px;display: inline-block;">名称：</span>' + data + '</li>';
-    var infoWindow = new BMap.InfoWindow(sContent); //创建信息窗口对象
-    thisMarker.openInfoWindow(infoWindow); //图片加载完后重绘infoWindow
+    var me = this;
+    var p = e.target;
+    var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+    var infoWindow = new BMap.InfoWindow(content);  // 创建信息窗口对象 
+    me.bkmap.openInfoWindow(infoWindow, point); //开启信息窗口
 };
 
 MapControl.prototype.handelPointFormat = function(information) {
