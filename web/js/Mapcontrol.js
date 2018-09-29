@@ -13,8 +13,8 @@ MapControl = function (opts) {
         target: "mainmap",
         width: '100%',
         height: '100%',
-        center: [0, 0],
-        zoom: 14,
+        center: [112.9357, 26],
+        zoom: 5,
         transform: null,
         keys: {
             google: "AIzaSyA-t6e94_7rituD9no88Y5BYo-FE6b5Tz0",
@@ -100,8 +100,8 @@ MapControl.prototype.getPointsInfo = function () {
         success: function (data) {
             var json = JSON.parse(data);
             if(json.success === true){
-                var information = json.data.geoList[0];
-                me.showPoint(information);
+                this.information = json.data.geoList[0];
+                me.showPoint(this.information);
             }
         },
         error: function (data) {
@@ -112,15 +112,24 @@ MapControl.prototype.getPointsInfo = function () {
 
 MapControl.prototype.showPoint = function(information) {
     var me = this;
-    var points = me.handelPointFormat(information);
-    for(var i = 0; i < points.length; i++) {
-        var scenicName = information[i].scenicname[0];
-        var pt = new BMap.Point(points[i][0], points[i][1]);
+    me.information = information;
+    me.BDPointMaker = [];
+    me.points = me.handelPointFormat(information);
+    me.addPointToMap();
+};
+
+MapControl.prototype.addPointToMap = function(){
+    var me = this;
+    me.BDPointMaker = [];
+    for(var i = 0; i < this.points.length; i++) {
+        var scenicName = me.information[i].scenicname[0];
+        var pt = new BMap.Point(this.points[i][0], this.points[i][1]);
         var myIcon = new BMap.Icon("image/point-of-interest-32.png", new BMap.Size(32, 32));
         var marker = new BMap.Marker(pt, {icon: myIcon});  // 创建标注  
 //        marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
         me.bkmap.addOverlay(marker);              // 将标注添加到地图中
-        me.addClickHandler(scenicName,marker);   //添加监听事件      
+        me.addClickHandler(scenicName,marker);   //添加监听事件    
+        me.BDPointMaker.push(marker);
     }   
 };
 
@@ -173,4 +182,48 @@ MapControl.prototype.handelPointFormat = function(information) {
         points.push(point);
     }
     return points;
+};
+
+MapControl.prototype.searchByPology = function(cityName){
+    var me = this;
+    for(var i = 0; i < me.points.length; i++){
+        var flag = me.inOrOutPology(me.points[i], me.ply);
+        if(flag === true){
+            me.BDPointMaker[i].setAnimation(BMAP_ANIMATION_BOUNCE);
+        }
+    }
+};
+
+MapControl.prototype.pologyByCityName = function(cityName) {
+    var me = this;
+    var bdary = new BMap.Boundary();
+    bdary.get(cityName, function(rs) { //获取行政区域
+        me.bkmap.clearOverlays(); //清除地图覆盖物    
+        me.addPointToMap();
+        var count = rs.boundaries.length; //行政区域的点有多少个
+        if (count === 0) {
+            alert('未能获取当前输入行政区域');
+            return;
+        }
+        var pointArray = [];
+        for (var i = 0; i < count; i++) {
+            var ply = new BMap.Polygon(rs.boundaries[i], {
+                strokeWeight: 2,
+                strokeColor: "#ff0000"
+            }); //建立多边形覆盖物
+            me.bkmap.addOverlay(ply); //添加覆盖物
+            pointArray = pointArray.concat(ply.getPath());     
+        }
+        var pts = [];
+        for(var i = 0; i < pointArray.length; i++)
+            pts.push(pointArray[i]);
+        me.ply= new BMap.Polygon(pts);
+        me.searchByPology();
+    });
+};
+
+MapControl.prototype.inOrOutPology = function(point, ply){
+    var pt = new BMap.Point(point[0], point[1]);
+    var result = BMapLib.GeoUtils.isPointInPolygon(pt, ply);
+    return result;
 };
