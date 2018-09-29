@@ -17,7 +17,6 @@
 
         <link href="lib/notice/noticejs.css" rel="stylesheet" type="text/css"/>   
         <link href="lib/notice/animate.css" rel="stylesheet" type="text/css"/>
-        <link href="lib/jqueryui/jquery-ui.min.css" rel="stylesheet" type="text/css"/>
 
         <script src="lib/JQuery/jquery.min.js" type="text/javascript"></script>
         <script src="lib/izimodel/js/iziModal.min.js" type="text/javascript"></script>
@@ -31,7 +30,6 @@
         <script src="lib/notice/notice.js" type="text/javascript"></script>
 
         <script src="lib/Menulib/blooming-menu.min.js" type="text/javascript"></script>
-        <script src="lib/jqueryui/jquery-ui.min.js" type="text/javascript"></script>
         <script src="lib/Menulib/index.js" type="text/javascript"></script>
         <script>
             $(document).ready(function () {
@@ -42,8 +40,8 @@
 
                 m_mapcontrol = new MapControl({
                     target: "mainmap",
-                    center: [112.9357, 28.15273],
-                    zoom: 16,
+                    center: [112.9357, 26],
+                    zoom: 5,
                     transform: new Coordtransform()
                 });
 
@@ -66,7 +64,7 @@
                 // Prevents "elastic scrolling" on Safari
                 document.addEventListener('touchmove', function (event) {
                     'use strict',
-                    event.preventDefault()
+                    event.preventDefault();
                 });
 
 
@@ -89,6 +87,7 @@
 
                     $('.headright').append($('<a href="" onclick="destroyuser()"> 切换用户 </a>'));
                     $('._id_5').attr("disabled", false);
+                    $('._id_3').attr("disabled", false);
                 }
                 initmodel();
             }
