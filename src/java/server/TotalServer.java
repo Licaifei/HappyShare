@@ -59,6 +59,9 @@ public class TotalServer extends HttpServlet {
             else if(type.equals("USER")){
                 sv = new UserServer();
             }
+            else if(type.equals("DETAIL")){
+                sv = new DetailServer();
+            }
             
             sv.setRequest(json);
             sv.connectDB();
@@ -108,5 +111,9 @@ public class TotalServer extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    private connectPG DetailServer() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
 }
