@@ -28,7 +28,8 @@ and open the template in the editor.
         <script src="lib/fileinput/js/plugins/piexif.min.js" type="text/javascript"></script>
         <script src="lib/fileinput/js/plugins/sortable.min.js" type="text/javascript"></script>
         <script src="lib/fileinput/js/fileinput.min.js" type="text/javascript"></script>
-
+        <script src="lib/fileinput/js/locales/zh.js" type="text/javascript"></script>
+        
         <script src="lib/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
         <script src="lib/openlayers/build/ol.js" type="text/javascript"></script>
         <script src="js/global.js" type="text/javascript"></script>
@@ -56,13 +57,14 @@ and open the template in the editor.
                 getinfo();
 
                 $("#input-id").fileinput({
+                    language: 'zn',
                     uploadUrl: "/trendmg/",
                     allowedFileExtensions: ["jpg", "png", "gif", "jpeg", "bmp"],
                     minImageWidth: 80,
                     minImageHeight: 80,
                     maxImageWidth: 80,
                     maxImageHeight: 80,
-                    maxFileCount: 9,
+                    maxFileCount: 6,
                     showCaption: false,
                     showUpload: false,
                     dropZoneEnabled: false,
@@ -160,10 +162,13 @@ and open the template in the editor.
                 m_mapcontrol = new MapControl({
                     target: "mainmap",
                     center: pos,
-                    zoom: 8,
+                    zoom: 5,
+                    type: "person",
                     bkmapname: "BAIDU",
                     transform: new Coordtransform()
                 });
+
+                // m_mapcontrol.getTrendInfo();
 
                 document.onkeydown = keyDown;
                 function keyDown(e) {
@@ -188,24 +193,8 @@ and open the template in the editor.
                     autoOpen: false,
                     overlayColor: 'rgba(0, 0, 0, 0.6)',
                     onOpened: function () {
-//                        Connector({
-//                            url: "TotalServer",
-//                            params: {
-//                                type: "TREND_GETTREND",
-//                                data: {
-//                                    userid: sessionStorage["userid"],
-//                                    stnum: 0,
-//                                    endnum: 20
-//                                }
-//                            },
-//                            success: function (json) {
-//                                
-//                            },
-//                            failure: function () {
-//
-//                            }
-//                        });
-                        
+                        console.log("fenxiang open");
+
                     },
                     onClosed: function () {
                         console.log('onClosed');
@@ -227,6 +216,7 @@ and open the template in the editor.
                         console.log('onClosed');
                     }
                 });
+                
                 $("#trend-target").iziModal({
                     title: "乐晒`查看动态",
                     iconClass: 'icon-announcement',
@@ -236,7 +226,32 @@ and open the template in the editor.
                     autoOpen: false,
                     overlayColor: 'rgba(0, 0, 0, 0.6)',
                     onOpened: function () {
-                        console.log('onOpened');
+                        Connector({
+                            url: "TotalServer",
+                            params: {
+                                type: "TREND_GETINFO",
+                                data: {
+                                    userid: sessionStorage["userid"],
+                                    stnum: 0,
+                                    endnum: 20
+                                }
+                            },
+                            success: function (json) {
+                                var datas = json.data.TrendList[0];
+//                                for(var i = 0; i < datas.length; i++){
+//                                    var data = datas[i];
+//                                    
+//                                    setontrend(data.trendid, data.content, data.images, data.viewname, data.pick, data.publictime);
+//                                }
+                                $('.pick').find('i').on('click', function(){
+                                    var thumb = $(this).parent().find('span');
+                                    alert(thumb.text);
+                                });
+                            },
+                            failure: function () {
+
+                            }
+                        });
                     }
                 });
             }
@@ -272,9 +287,37 @@ and open the template in the editor.
             }
 
 
-            function setontrend(tid, uid, content, imgs, picks)
+            function setontrend(tid, content, images, viewname, picks, pubtime)
             {
+                var tr = $('div').addClass('trend');
+                tr.append($('<p class="text-primary">' + content + '</p>'));
 
+                // tupian
+                var imgdiv = $('<div>').addClass('imagesdiv');
+                var imgs = $('div').addClass('row');
+                for (var i = 0; i < images.length; i++) {
+                    var html = '<div class="col-xs-6 col-md-4 trendimg">'
+                            + '    <a class="thumbnail">'
+                            + '        <img src="' + images[i] + '" class="img-thumbnail">'
+                            + '    </a>'
+                            + '</div>';
+                    imgs.append($(html));
+                }
+                imgdiv.append(imgs);
+                tr.append(imgdiv);
+                // dianzan
+                var pickdiv = $('div').addClass('pickdiv');
+                var ht = '<div class="publictime" style="">'
+                       + '    <a>' + pubtime + '</a>'
+                       + '    <div class="pick">'
+                       + '        <i class=" fa fa-fw fa-lg fa-thumbs-up"></i>'
+                       + '        <span>' + picks + '</span>'
+                       + '    </div>'
+                       + '</div>';
+               
+               pickdiv.append($(ht));
+               tr.append(pickdiv);
+                $('#trendsdiv').append(tr);
             }
 
         </script>
@@ -353,10 +396,12 @@ and open the template in the editor.
 
                     </div>
                 </div>
+                <br />
                 <div class="row">
                     <input type="text" id="scenname" placeholder="游览景点..." />
                     <button onclick="SetSen()">...</button>
                 </div>
+                <br/>
                 <div class="row">
                     <button type="button" class="btn btn-info">发布</button>
                 </div>
@@ -480,7 +525,55 @@ and open the template in the editor.
         </div>
 
         <div id="trend-target" class="form-bottom" style="min-height: 400px;">
+            <div id="trendsdiv">
+                <div class="trend">
+                    <p class="text-primary">测试动态15456464156487846351564864521545642154</p>
 
+                    <div class="imagesdiv">
+                        <div class="row">
+                            <div class="col-xs-6 col-md-4 trendimg">
+                                <a class="thumbnail">
+                                    <img src="image/2.png" alt="1" class="img-thumbnail">
+                                </a>                          
+                            </div>
+                            <div class="col-xs-6 col-md-4 trendimg">
+                                <a class="thumbnail">
+                                    <img src="image/2.png" alt="1" class="img-thumbnail">
+                                </a>     
+                            </div>
+                            <div class="col-xs-6 col-md-4 trendimg">
+                                <a class="thumbnail">
+                                    <img src="image/2.png" alt="1" class="img-thumbnail">
+                                </a>     
+                            </div>
+                            <div class="col-xs-6 col-md-4 trendimg">
+                                <a class="thumbnail">
+                                    <img src="image/2.png" alt="1" class="img-thumbnail">
+                                </a>     
+                            </div>
+                            <div class="col-xs-6 col-md-4 trendimg">
+                                <a class="thumbnail">
+                                    <img src="image/2.png" alt="1" class="img-thumbnail">
+                                </a>     
+                            </div>
+                            <div class="col-xs-6 col-md-4 trendimg">
+                                <a class="thumbnail">
+                                    <img src="image/2.png" alt="1" class="img-thumbnail">
+                                </a>     
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pickdiv">
+                        <div class="publictime" style="">
+                            <a>2018-09-05 18:32</a>
+                            <div class="pick">
+                                <i class=" fa fa-fw fa-lg fa-thumbs-up"></i>
+                                <span>125</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </body>
 </html>

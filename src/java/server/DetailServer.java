@@ -56,7 +56,7 @@ public class DetailServer extends connectPG {
             //            获取景点图片
             operatPicture thisview = new operatPicture();
 //            String picpath = "D:\\Downloads\\data\\" + _data.getString("SearchID");
-            String picpath = "D:\\Downloads\\data\\" + String.valueOf(a);
+            String picpath = "web\\image\\data\\" + String.valueOf(a);
             thisview.setPictureFileStr(picpath);
             thisview.getPictures();
 //            查询景点详细信息

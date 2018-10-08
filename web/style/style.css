@@ -1162,3 +1162,39 @@ a:hover,a:focus{
 dl{
     margin-bottom: 10px;
 }
+
+/*
+    动态列表的样式
+*/
+.trend
+{
+    background: #dbdbdb;
+    padding: 10px;
+    margin: 5px;
+    box-shadow: darkgrey 2px 2px 3px 5px;
+}
+
+.imagesdiv
+{
+    padding: 10px;
+    background: ivory;
+}
+
+.trendimg
+{
+    width: auto;
+    max-width: 200px;
+    height: 100%;
+    border: solid 0.1em black;
+    margin: 10px;
+}
+
+.pickdiv
+{
+    right: 0px;
+    cursor: pointer;
+}
+
+.pick {
+    float: right;
+}

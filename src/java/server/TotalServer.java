@@ -53,14 +53,21 @@ public class TotalServer extends HttpServlet {
             String type = strArr[0];
             
             connectPG sv = null;
-            if(type.equals("Point")){
-                sv = new getPoint();
-            }
-            else if(type.equals("USER")){
-                sv = new UserServer();
-            }
-            else if(type.equals("DETAIL")){
-                sv = new DetailServer();
+            switch (type) {
+                case "Point":
+                    sv = new getPoint();
+                    break;
+                case "USER":
+                    sv = new UserServer();
+                    break;
+                case "DETAIL":
+                    sv = new DetailServer();
+                    break;
+                case "TREND":
+                    sv = new TrendServer();
+                    break;
+                default:
+                    break;
             }
             
             sv.setRequest(json);
