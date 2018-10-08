@@ -85,8 +85,8 @@ public class UserServer extends connectPG {
         st.setString(4, _data.getString("profilename"));
         st.setString(5, _data.getString("phone"));
         st.setBoolean(6, _data.getBoolean("sex"));
-        st.setString(7, _data.getString("useraddress"));
-        st.setString(8, _data.getString("userintro"));
+        st.setString(7, _data.getString("address"));
+        st.setString(8, _data.getString("intro"));
         // st.execute();
         ResultSet rs = st.executeQuery();
         int id = 0;
