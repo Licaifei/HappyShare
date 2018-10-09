@@ -27,6 +27,9 @@ public class getPoint extends connectPG {
     public void run(){
         if(_type.equals("Index")){
             get5APoint();
+        } 
+        else if(_type.equals("Trend")){
+            getTrend();
         }
     }
     
@@ -46,7 +49,33 @@ public class getPoint extends connectPG {
             JSONObject data = new JSONObject();
             data.append("geoList", pointList);
             setResponse(true, "获取首页所需要的5A景区的信息", data);
-        } catch (SQLException | JSONException ex) {
+        } 
+        catch (SQLException | JSONException ex) 
+        {
+            Logger.getLogger(getPoint.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    private void getTrend(){
+        try {
+            String sql = "select trendid, content, ST_AsText(tposition) as point from trend where userid = ?;";
+            PreparedStatement st = _connection.prepareStatement(sql);
+            st.setInt(1, _data.getInt("userid"));
+            
+            ResultSet rs = st.executeQuery();
+            ArrayList pointList = new ArrayList();
+            while (rs.next()) {
+                JSONObject pointInfo = new JSONObject();
+                pointInfo.append("index", rs.getString("trendid"));
+                pointInfo.append("content", rs.getString("content"));
+                pointInfo.append("geometry", rs.getString("point"));
+                pointList.add(pointInfo);
+            }
+            JSONObject data = new JSONObject();
+            data.append("geoList", pointList);
+            setResponse(true, "获取成功！", data);
+        } catch (SQLException | JSONException ex) 
+        {
             Logger.getLogger(getPoint.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

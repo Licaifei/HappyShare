@@ -44,6 +44,8 @@ function loginuser()
             }
         },
         success: function (json) {
+//            var cont = JSON.parse(json);
+            var cont = json;
             new NoticeJs({
                 text: '登陆成功',
                 position: 'topRight',
@@ -53,6 +55,7 @@ function loginuser()
                 }
             }).show();
             sessionStorage['name'] = name;
+            sessionStorage['userid'] = cont.data.userid;
             window.location.href = "personal.html";
         },
         failure(json) {

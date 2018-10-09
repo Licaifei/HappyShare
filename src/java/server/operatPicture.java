@@ -45,13 +45,13 @@ public class operatPicture {
     
     //返回一个文件夹下的所有图片
     protected List<String> getPictures(){
-        File file = new File(pictureFileStr);//文件夹路径
+//        File file = new File(pictureFileStr);//文件夹路径
+        File file = new File("home/fei/NetBeansProjects/HappyShare/web/image/userDynamic/1/");
         File[] files = file.listFiles();//遍历该文件夹
         List<String> picturesPath = new ArrayList<>();
         if(null!=files)
         {
-            for (int i = 0; i < files.length; i++) {
-                File file1 = files[i];
+            for (File file1 : files) {
                 String path = file1.getPath();//获取图片路径
                 picturesPath.add(path);
             }
@@ -82,29 +82,38 @@ public class operatPicture {
     
     //根据base64编码的字符串在本地存储图片
     protected void generateImg(String path, String base64){
-        BASE64Decoder decoder = new BASE64Decoder();
+        BASE64Decoder decoder;
+        decoder = new BASE64Decoder();
         try {
             if (base64 != null) {
                 byte[] b = decoder.decodeBuffer(base64);
-                OutputStream out = new FileOutputStream(path);
-                out.write(b);
-                out.flush();
-                out.close();
+                try (OutputStream out = new FileOutputStream(path)) {
+                    out.write(b);
+                    out.flush();
+                }
             } else {
                 System.out.println("Base64编码不能为null");
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
         }
     }
     
     //通过景点的编号获取景点的图片，返回的是base64编码的字符串List
     public List<String> getScenicPictures(String index){
         if(pictureArr.isEmpty() == false)
-            pictureArr = new ArrayList<String>();
+            pictureArr = new ArrayList<>();
         if(pictureFileStr != null)
             pictureFileStr = null;
         setPicturePath("web/image/data/" + index);
+        return getPictures();
+    }
+    
+    public List<String> getTrendPictures(String index){
+        if(pictureArr.isEmpty() == false)
+            pictureArr = new ArrayList<>();
+        if(pictureFileStr != null)
+            pictureFileStr = null;
+        setPicturePath("web/image/userDynamic/" + index + "/");
         return getPictures();
     }
     
@@ -131,11 +140,12 @@ public class operatPicture {
         }
     }
     
-//    public static void main(String[] args){       
-//        operatPicture getPic = new operatPicture();
-////        List<String> pictures = getPic.getScenicPictures("4");
-////        getPic.storageUserDymanicPictures("1", "2", pictures);
+    public static void main(String[] args){       
+        operatPicture getPic = new operatPicture();
+//        List<String> pictures = getPic.getScenicPictures("4");
+//        getPic.storageUserDymanicPictures("1", "2", pictures);
 //        List<String> pictures = getPic.getUserDynamicPictures("1", "2");
 //        System.out.println(pictures.size());
-//    }
+        getPic.getTrendPictures("1");
+    }
 }

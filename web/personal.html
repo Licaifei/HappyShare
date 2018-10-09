@@ -6,54 +6,320 @@ and open the template in the editor.
 -->
 <html>
     <head>
-        <title>Personal</title>
+        <title>HappyShare-个人中心</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        
+
         <link href="style/font-awesome.min.css" rel="stylesheet" type="text/css"/>
         <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
         <link href="lib/bootstrap/css/bootstrap-vertical-menu.css" rel="stylesheet" type="text/css"/>
         <link href="lib/openlayers/css/ol.css" rel="stylesheet" type="text/css"/>
+        <link href="lib/fileinput/css/fileinput.min.css" rel="stylesheet" type="text/css"/>
         <link href="style/style.css" rel="stylesheet" type="text/css"/>
+        <link href="lib/izimodel/css/iziModal.min.css" rel="stylesheet" type="text/css"/>
+
+        <link href="lib/imgupload/tinyImgUpload.css" rel="stylesheet" type="text/css"/>
+
+        <link href="lib/notice/noticejs.css" rel="stylesheet" type="text/css"/>   
+        <link href="lib/notice/animate.css" rel="stylesheet" type="text/css"/>
 
         <script src="lib/JQuery/jquery.min.js" type="text/javascript"></script>
+        <script src="lib/izimodel/js/iziModal.min.js" type="text/javascript"></script>
+        <script src="lib/fileinput/js/plugins/piexif.min.js" type="text/javascript"></script>
+        <script src="lib/fileinput/js/plugins/sortable.min.js" type="text/javascript"></script>
+        <script src="lib/fileinput/js/fileinput.min.js" type="text/javascript"></script>
+        <script src="lib/fileinput/js/locales/zh.js" type="text/javascript"></script>
+        
         <script src="lib/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
         <script src="lib/openlayers/build/ol.js" type="text/javascript"></script>
         <script src="js/global.js" type="text/javascript"></script>
+        <script src="js/register.js" type="text/javascript"></script>
         <script src="js/Connector.js" type="text/javascript"></script>
         <script src="js/coordtransform.js" type="text/javascript"></script>
+        <script src="lib/notice/notice.js" type="text/javascript"></script>
         <script src="js/Mapcontrol.js" type="text/javascript"></script>
+        <script src="lib/imgupload/tinyImgUpload.js" type="text/javascript"></script>
 
         <script>
-
             $(document).ready(function () {
                 /*
                  * bkmap:GAODE,BAIDU,GOOGLE_SATELLITE,GOOGLE_HYBRID
                  */
+
+                checklogin();
+
+                initmap();
+
+                checklogin();
+
+                initmodel();
+
+                getinfo();
+
+                $("#input-id").fileinput({
+                    language: 'zn',
+                    uploadUrl: "/trendmg/",
+                    allowedFileExtensions: ["jpg", "png", "gif", "jpeg", "bmp"],
+                    minImageWidth: 80,
+                    minImageHeight: 80,
+                    maxImageWidth: 80,
+                    maxImageHeight: 80,
+                    maxFileCount: 6,
+                    showCaption: false,
+                    showUpload: false,
+                    dropZoneEnabled: false,
+                    resizeImage: true
+                });
+
+                /*
+                 Form validation
+                 */
+                $('.login-form input[type="text"], .login-form input[type="password"], .login-form textarea').on('focus', function () {
+                    $(this).removeClass('input-error');
+                });
+
+                $('.login-form').on('submit', function (e) {
+                    $(this).find('input[type="text"], input[type="password"], textarea').each(function () {
+                        if ($(this).val() === "") {
+                            e.preventDefault();
+                            $(this).addClass('input-error');
+                        } else {
+                            $(this).removeClass('input-error');
+                        }
+                    });
+                });
+            });
+
+            function checklogin()
+            {
+                _CURRECT_USERNAME = sessionStorage["name"];
+                if (typeof (_CURRECT_USERNAME) === "undefined")
+                {
+                    window.location.href = "index.html";
+                } else
+                {
+                    $("#user").html("<span>" + _CURRECT_USERNAME + "</span>");
+                }
+            }
+            /**
+             * 获取用户信息，填充表单
+             * @returns {}
+             */
+            function getinfo() {
+                Connector({
+                    url: "TotalServer",
+                    params: {
+                        type: "USER_GETINFO",
+                        data: {
+                            userid: sessionStorage["userid"]
+                        }
+                    },
+                    success: function (json) {
+                        // var cont = JSON.prase(json);
+                        var cont = json;
+                        $('#form-username').val(cont.data.username);
+                        $('#form-password').val(cont.data.password);
+                        $('#form-password2').val(cont.data.password);
+                        $('#form-Email').val(cont.data.email);
+                        $('#form-Phone').val(cont.data.phone);
+                        $('#form-UserAddress').val(cont.data.useraddress);
+                        $('#form-UserIntro').val(cont.data.userintro);
+
+                        var sex = cont.data.sex;
+                        if (sex) {
+                            $('input:radio[name="radio"][value="1"').attr("checked", true);
+                        }
+                    },
+                    failure: function () {
+
+                    }
+                });
+            }
+            /**
+             * 初始化地图插件
+             * @returns {undefined}
+             */
+            function initmap() {
                 var shei = screen.height;
                 $(".htmleaf-content").css({
                     height: shei
                 });
+                pos = [112, 26];
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                            function (position) {
+                                console.log(position.coords.longitude);
+                                console.log(position.coords.latitude);
+                                pos[0] = position.coords.longitude;
+                                pos[1] = position.coords.latitude;
+                            },
+                            function (e) {
+                                throw(e.message);
+                            }
+                    );
+                }
 
-                mapcontrol = new MapControl({
+                m_mapcontrol = new MapControl({
                     target: "mainmap",
-                    center: [112.9357, 28.15273],
-                    zoom: 16,
+                    center: pos,
+                    zoom: 5,
+                    type: "person",
                     bkmapname: "BAIDU",
                     transform: new Coordtransform()
                 });
-                
-                 _CURRECT_USERNAME = sessionStorage["name"];
 
-                if (typeof (_CURRECT_USERNAME) === "undefined")
-                {
-                    window.location.href = "index.html";
+                // m_mapcontrol.getTrendInfo();
+
+                document.onkeydown = keyDown;
+                function keyDown(e) {
+                    if (e.keyCode === 27) {
+                        m_mapcontrol.panorama.hide();
+                    }
                 }
-                else
-                {
-                    $(".user").html("<span>" + _CURRECT_USERNAME+ "</span>");
+            }
+
+            /**
+             * 初始化发布动态对话框插件
+             * @returns {undefined}
+             */
+            function initmodel()
+            {
+                $("#fb-target").iziModal({
+                    title: "乐晒`分享你的旅途",
+                    iconClass: 'icon-announcement',
+                    padding: 20,
+                    overlayClose: false,
+                    width: 600,
+                    autoOpen: false,
+                    overlayColor: 'rgba(0, 0, 0, 0.6)',
+                    onOpened: function () {
+                        console.log("fenxiang open");
+
+                    },
+                    onClosed: function () {
+                        console.log('onClosed');
+                    }
+                });
+
+                $("#data-target").iziModal({
+                    title: "乐晒`编辑个人资料",
+                    iconClass: 'icon-announcement',
+                    padding: 30,
+                    overlayClose: false,
+                    width: 600,
+                    autoOpen: false,
+                    overlayColor: 'rgba(0, 0, 0, 0.6)',
+                    onOpened: function () {
+                        console.log('onOpened');
+                    },
+                    onClosed: function () {
+                        console.log('onClosed');
+                    }
+                });
+                
+                $("#trend-target").iziModal({
+                    title: "乐晒`查看动态",
+                    iconClass: 'icon-announcement',
+                    padding: 30,
+                    overlayClose: false,
+                    width: 600,
+                    autoOpen: false,
+                    overlayColor: 'rgba(0, 0, 0, 0.6)',
+                    onOpened: function () {
+                        Connector({
+                            url: "TotalServer",
+                            params: {
+                                type: "TREND_GETINFO",
+                                data: {
+                                    userid: sessionStorage["userid"],
+                                    stnum: 0,
+                                    endnum: 20
+                                }
+                            },
+                            success: function (json) {
+                                var datas = json.data.TrendList[0];
+//                                for(var i = 0; i < datas.length; i++){
+//                                    var data = datas[i];
+//                                    
+//                                    setontrend(data.trendid, data.content, data.images, data.viewname, data.pick, data.publictime);
+//                                }
+                                $('.pick').find('i').on('click', function(){
+                                    var thumb = $(this).parent().find('span');
+                                    alert(thumb.text);
+                                });
+                            },
+                            failure: function () {
+
+                            }
+                        });
+                    }
+                });
+            }
+
+            /**
+             * 地图上选取点
+             * @returns {}
+             */
+            function SetSen()
+            {
+
+            }
+
+            function trigger_open_new()
+            {
+                $('#fb-target').iziModal('open', this);
+            }
+
+            function trigger_data_edit()
+            {
+                $('#data-target').iziModal('open', this);
+            }
+
+            function trigger_trend_show()
+            {
+                $('#trend-target').iziModal('open', this);
+            }
+
+            function exit()
+            {
+                destroyuser();
+                window.location.href = "index.html";
+            }
+
+
+            function setontrend(tid, content, images, viewname, picks, pubtime)
+            {
+                var tr = $('div').addClass('trend');
+                tr.append($('<p class="text-primary">' + content + '</p>'));
+
+                // tupian
+                var imgdiv = $('<div>').addClass('imagesdiv');
+                var imgs = $('div').addClass('row');
+                for (var i = 0; i < images.length; i++) {
+                    var html = '<div class="col-xs-6 col-md-4 trendimg">'
+                            + '    <a class="thumbnail">'
+                            + '        <img src="' + images[i] + '" class="img-thumbnail">'
+                            + '    </a>'
+                            + '</div>';
+                    imgs.append($(html));
                 }
-            });
+                imgdiv.append(imgs);
+                tr.append(imgdiv);
+                // dianzan
+                var pickdiv = $('div').addClass('pickdiv');
+                var ht = '<div class="publictime" style="">'
+                       + '    <a>' + pubtime + '</a>'
+                       + '    <div class="pick">'
+                       + '        <i class=" fa fa-fw fa-lg fa-thumbs-up"></i>'
+                       + '        <span>' + picks + '</span>'
+                       + '    </div>'
+                       + '</div>';
+               
+               pickdiv.append($(ht));
+               tr.append(pickdiv);
+                $('#trendsdiv').append(tr);
+            }
+
         </script>
     </head>
     <body>
@@ -73,19 +339,19 @@ and open the template in the editor.
                     </a>
                 </li>
                 <li>
-                    <a href>
+                    <a href="javascript:trigger_open_new()"  class="trigger">
                         <i class="fa fa-fw fa-lg fa-share-alt "></i> 
                         <span>发布</span>
                     </a>
                 </li>
                 <li>
-                    <a href>
+                    <a href="javascript:trigger_data_edit()" class="trigger-data-edit">
                         <i class="fa fa-fw fa-lg fa-map" aria-hidden="true"></i>
                         <span>资料</span>
                     </a>
                 </li>
                 <li>
-                    <a href>
+                    <a href="javascript:trigger_trend_show()">
                         <i class="fa fa-fw fa-lg fa-tasks"></i> 
                         <span>查看所有</span>
                     </a>
@@ -97,7 +363,7 @@ and open the template in the editor.
                     </a>
                 </li>
                 <li>
-                    <a href>
+                    <a href='javascript:exit()' >
                         <i class="fa fa-fw fa-lg fa-external-link"></i> 
                         <span>退出</span>
                     </a>
@@ -110,7 +376,202 @@ and open the template in the editor.
             </header>
             <div class="htmleaf-content bgcolor-8">
                 <div id="mainmap">
-                    
+
+                </div>
+            </div>
+        </div>
+
+        <div id="fb-target" style="min-height: 600px; overflow: scroll;">
+            <div class="container-fluid">
+                <div class="row">
+                    <h2 class="">分享你的美</h2><hr>
+                    <textarea class="form-control" id="inputNote" rows="3" maxlength="256" placeholder="快来分享你的生活吧..."></textarea>
+                    <br>
+                </div>
+                <div class="row">
+                    <div class="item col-xs-12" style="height: auto;">
+                        <label class="control-label">添加图片</label>
+
+                        <input id="input-id" name="input-b5[]" type="file" multiple data-show-upload ="false"> 
+
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <input type="text" id="scenname" placeholder="游览景点..." />
+                    <button onclick="SetSen()">...</button>
+                </div>
+                <br/>
+                <div class="row">
+                    <button type="button" class="btn btn-info">发布</button>
+                </div>
+            </div>
+        </div>
+        <!--  以下为编辑个人资料   /-->
+        <div id="data-target" class="form-bottom" style="height: 550px;">
+            <form role="form" action="" method="post" class="login-form">
+                <div class="form-group">
+                    <label class="sr-only" for="form-username">用户名</label>
+                    <input type="text" name="form-username" placeholder="用户名..." class="form-control" required="required" id="form-username">
+                </div>
+                <div class="form-group"> 
+                    <label class="sr-only" for="form-password">密码</label>
+                    <input type="password" name="form-password" placeholder="密码..."  class="form-control" required="required" id="form-password">
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="form-password">重新输入密码</label>
+                    <input type="password" name="form-password" placeholder="重输密码..."  class="form-control" required="required" id="form-password2">
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="form-Email">邮箱</label>
+                    <input type="text" name="form-Email" placeholder="邮箱..." class="form-control" required="required" id="form-Email">
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="form-Phone">电话</label>
+                    <input type="text" name="form-Phone" placeholder="电话..." class="form-control" id="form-Phone">
+                </div>
+                <div class="form-group">
+                    <label class="radiostyle">性别</label>
+                    <input class="radiostyle" type="radio" name="radio" id="r4" value=0 checked="">
+                    <label for="r4" class="radiostyle"><span></span>男</label>
+                    <input class="radiostyle" type="radio" name="radio" id="r5" value=1 >
+                    <label for="r5" class="radiostyle"><span></span>女</label>
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="form-UserAddress">个人地址</label>
+                    <input type="text" name="form-UserAddress" placeholder="用户住址..." class="form-control" id="form-UserAddress">
+                </div>
+                <div class="form-group">
+                    <label class="sr-only" for="form-UserIntro">介绍</label>
+                    <input type="text" name="form-UserIntro" placeholder="个人介绍..." class="form-control" id="form-UserIntro">
+                </div>
+                <button type="button" class="btn btn-info" id="register" onclick="onUpdate()">修改</button>
+            </form>
+            <script>
+                /**
+                 * 修改用户信息
+                 * @returns {Boolean}
+                 */
+                function onUpdate() {
+                    var pwd = $('#form-password').val();
+                    var cpwd = $('#form-password2').val();
+                    var name = $('#form-username').val();
+                    var email = $('#form-Email').val();
+                    if (name === "") { // "",null,undefined,NaN
+                        alert("用户名不能为空!");
+                        return false;
+                    }
+                    if (pwd !== cpwd) {
+                        alert("两次密码不一致!");
+                        $('#form-password').val("");
+                        $('#form-password2').val("");
+                        return false;
+                    }
+                    if (email === "") { // "",null,undefined,NaN
+                        alert("邮箱不能为空!");
+                        return false;
+                    }
+                    var myreg = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
+                    if (!myreg.test(email))//对输入的值进行判断
+                    {
+                        alert('提示\n\n请输入有效的E_mail！');
+                        return false;
+                    }
+
+                    sex = $('input:radio[name="radio"]:checked').val();
+                    var usersex = (sex === 1 ? true : false);
+                    var username = $('#form-username').val();
+                    var password = $('#form-password').val();
+                    console.log(username);
+                    console.log(password);
+                    Connector({
+                        url: "TotalServer",
+                        params: {
+                            type: "USER_UPDATEINFO",
+                            data: {
+                                username: username,
+                                password: password,
+                                phone: $('#form-Phone').val(),
+                                email: $('#form-Email').val(),
+                                sex: usersex,
+                                address: $('#form-UserAddress').val(),
+                                intro: $('#form-UserIntro').val()
+                            }
+                        },
+                        success: function (json) {
+                            new NoticeJs({
+                                text: '修改成功',
+                                position: 'topCenter',
+                                animation: {
+                                    open: 'animated bounceInRight',
+                                    close: 'animated bounceOutLeft'
+                                }
+                            }).show();
+                        },
+                        failure: function () {
+                            new NoticeJs({
+                                text: '修改失败',
+                                position: 'topCenter',
+                                type: 'error',
+                                animation: {
+                                    open: 'animated bounceInRight',
+                                    close: 'animated bounceOutLeft'
+                                }
+                            }).show();
+                        }
+                    });
+                }
+            </script>
+        </div>
+
+        <div id="trend-target" class="form-bottom" style="min-height: 400px;">
+            <div id="trendsdiv">
+                <div class="trend">
+                    <p class="text-primary">测试动态15456464156487846351564864521545642154</p>
+
+                    <div class="imagesdiv">
+                        <div class="row">
+                            <div class="col-xs-6 col-md-4 trendimg">
+                                <a class="thumbnail">
+                                    <img src="image/2.png" alt="1" class="img-thumbnail">
+                                </a>                          
+                            </div>
+                            <div class="col-xs-6 col-md-4 trendimg">
+                                <a class="thumbnail">
+                                    <img src="image/2.png" alt="1" class="img-thumbnail">
+                                </a>     
+                            </div>
+                            <div class="col-xs-6 col-md-4 trendimg">
+                                <a class="thumbnail">
+                                    <img src="image/2.png" alt="1" class="img-thumbnail">
+                                </a>     
+                            </div>
+                            <div class="col-xs-6 col-md-4 trendimg">
+                                <a class="thumbnail">
+                                    <img src="image/2.png" alt="1" class="img-thumbnail">
+                                </a>     
+                            </div>
+                            <div class="col-xs-6 col-md-4 trendimg">
+                                <a class="thumbnail">
+                                    <img src="image/2.png" alt="1" class="img-thumbnail">
+                                </a>     
+                            </div>
+                            <div class="col-xs-6 col-md-4 trendimg">
+                                <a class="thumbnail">
+                                    <img src="image/2.png" alt="1" class="img-thumbnail">
+                                </a>     
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pickdiv">
+                        <div class="publictime" style="">
+                            <a>2018-09-05 18:32</a>
+                            <div class="pick">
+                                <i class=" fa fa-fw fa-lg fa-thumbs-up"></i>
+                                <span>125</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

@@ -62,7 +62,7 @@ MapControl.prototype._initBKmap = function () {
     window.__initbaidumap = function () {
         me._baiduJSReady = true;
         me.initbaidumap();
-        me.getPointsInfo();
+        // me.getPointsInfo();
     };
 };
 
@@ -78,11 +78,19 @@ MapControl.prototype.initbaidumap = function () {
     me.bkmap.centerAndZoom(point, me.opts.zoom);
     me.bkmap.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
 
-    me.bkmap.addControl(new BMap.NavigationControl());
+    // me.bkmap.addControl(new BMap.NavigationControl());
     me.bkmap.addControl(new BMap.ScaleControl());
     me.bkmap.addControl(new BMap.OverviewMapControl());
     me.bkmap.addControl(new BMap.MapTypeControl());
 //    me.bkmap.setCurrentCity("北京"); // 仅当设置城市信息时，MapTypeControl的切换功能才能可用
+
+    if(me.opts.type === "index")
+    {
+        me.getPointsInfo();
+    }
+    else {
+        me.getTrendInfo();
+    }
 };
 
 //增加点（WGS84)在图层上
@@ -110,10 +118,73 @@ MapControl.prototype.getPointsInfo = function () {
     });
 };
 
+MapControl.prototype.getTrendInfo = function() 
+{
+    var me = this;
+    var userid = sessionStorage["userid"];
+    if(typeof(userid) === "undefined")
+        return;
+    $.ajax({
+        url: "TotalServer",
+        data: {
+            request: JSON.stringify({
+                type: "Point_Trend",
+                data: {
+                    userid : userid
+                }
+            })
+        },
+        method: "POST",
+        success: function (data) {
+            var json = JSON.parse(data);
+            if(json.success === true){
+                this.information = json.data.geoList[0];
+                me.showTrendPoint(this.information);
+            }
+        },
+        error: function (data) {
+            alert("网络错误，请检查您的网络连接！");
+        }
+    });
+};
+/**
+ * 将动态信息显示到地图
+ * @param {json} information
+ * @returns {}
+ */
+MapControl.prototype.showTrendPoint = function(information)
+{
+    var me = this;
+    me.trendinformation = information;
+
+    me.trendpoints = me.handelPointFormat(information);
+    me.addTrendPointToMap();
+};
+
+MapControl.prototype.addTrendPointToMap = function(){
+    var me = this;
+    me.BDTrendPointMaker = [];
+    for(var i = 0; i < this.trendpoints.length; i++) {
+        var scenicName = me.trendinformation[i].content[0];
+        var pt = new BMap.Point(this.trendpoints[i][0], this.trendpoints[i][1]);
+        var myIcon = new BMap.Icon("image/point-of-interest-32.png", new BMap.Size(32, 32));
+        var marker = new BMap.Marker(pt, {icon: myIcon});  // 创建标注  
+//        marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+        me.bkmap.addOverlay(marker);              // 将标注添加到地图中
+        me.addClickHandler(scenicName,marker);   //添加监听事件    
+        me.BDTrendPointMaker.push(marker);
+    }   
+};
+
+/**
+ * 将景点显示到地图上
+ * @param {json} information
+ * @returns {}
+ */
 MapControl.prototype.showPoint = function(information) {
     var me = this;
     me.information = information;
-    me.BDPointMaker = [];
+
     me.points = me.handelPointFormat(information);
     me.addPointToMap();
 };
