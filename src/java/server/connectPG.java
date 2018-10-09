@@ -54,7 +54,7 @@ public abstract class connectPG {
         String url = "jdbc:postgresql://127.0.0.1/happyshare";
         Properties props = new Properties();
         props.setProperty("user", "postgres");
-        props.setProperty("password", "123456");
+        props.setProperty("password", "1127");
 
         try {
             _connection = DriverManager.getConnection(url, props);

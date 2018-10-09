@@ -29,7 +29,7 @@ and open the template in the editor.
         <script src="lib/fileinput/js/plugins/sortable.min.js" type="text/javascript"></script>
         <script src="lib/fileinput/js/fileinput.min.js" type="text/javascript"></script>
         <script src="lib/fileinput/js/locales/zh.js" type="text/javascript"></script>
-        
+
         <script src="lib/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
         <script src="lib/openlayers/build/ol.js" type="text/javascript"></script>
         <script src="js/global.js" type="text/javascript"></script>
@@ -37,7 +37,7 @@ and open the template in the editor.
         <script src="js/Connector.js" type="text/javascript"></script>
         <script src="js/coordtransform.js" type="text/javascript"></script>
         <script src="lib/notice/notice.js" type="text/javascript"></script>
-        <script src="js/Mapcontrol.js" type="text/javascript"></script>
+        <script src="Mapcontrol.js" type="text/javascript"></script>
         <script src="lib/imgupload/tinyImgUpload.js" type="text/javascript"></script>
 
         <script>
@@ -45,21 +45,17 @@ and open the template in the editor.
                 /*
                  * bkmap:GAODE,BAIDU,GOOGLE_SATELLITE,GOOGLE_HYBRID
                  */
-
                 checklogin();
-
                 initmap();
-
                 checklogin();
-
+                gettrend();
                 initmodel();
-
                 getinfo();
 
                 $("#input-id").fileinput({
                     language: 'zn',
-                    uploadUrl: "/trendmg/",
-                    allowedFileExtensions: ["jpg", "png", "gif", "jpeg", "bmp"],
+                    uploadUrl: "/trendimgserver",
+                    allowedFileExtensions: ["jpg", "jpeg"],
                     minImageWidth: 80,
                     minImageHeight: 80,
                     maxImageWidth: 80,
@@ -71,23 +67,7 @@ and open the template in the editor.
                     resizeImage: true
                 });
 
-                /*
-                 Form validation
-                 */
-                $('.login-form input[type="text"], .login-form input[type="password"], .login-form textarea').on('focus', function () {
-                    $(this).removeClass('input-error');
-                });
 
-                $('.login-form').on('submit', function (e) {
-                    $(this).find('input[type="text"], input[type="password"], textarea').each(function () {
-                        if ($(this).val() === "") {
-                            e.preventDefault();
-                            $(this).addClass('input-error');
-                        } else {
-                            $(this).removeClass('input-error');
-                        }
-                    });
-                });
             });
 
             function checklogin()
@@ -100,6 +80,39 @@ and open the template in the editor.
                 {
                     $("#user").html("<span>" + _CURRECT_USERNAME + "</span>");
                 }
+            }
+            /**
+             * 获取前20条动态
+             * @returns {}
+             */
+            function gettrend()
+            {
+                Connector({
+                    url: "TotalServer",
+                    params: {
+                        type: "TREND_GETINFO",
+                        data: {
+                            userid: sessionStorage["userid"],
+                            stnum: 0,
+                            endnum: 20
+                        }
+                    },
+                    success: function (json) {
+                        var datas = json.data.TrendList[0];
+                        for (var i = 0; i < datas.length; i++) {
+                            var data = datas[i];
+                            setontrend(data.trendid, data.content, data.images, data.viewname, data.pick, data.publictime);
+                        }
+                        $('.pick').find('i').on('click', function () {
+                            var thumb = $(this).parent().find('span');
+                            console.log(thumb[0].text);
+                            thumb.html(thumb[0].text + 1);
+                        });
+                    },
+                    failure: function (json) {
+
+                    }
+                });
             }
             /**
              * 获取用户信息，填充表单
@@ -154,7 +167,7 @@ and open the template in the editor.
                                 pos[1] = position.coords.latitude;
                             },
                             function (e) {
-                                throw(e.message);
+                                throw(e.message)
                             }
                     );
                 }
@@ -168,7 +181,6 @@ and open the template in the editor.
                     transform: new Coordtransform()
                 });
 
-                // m_mapcontrol.getTrendInfo();
 
                 document.onkeydown = keyDown;
                 function keyDown(e) {
@@ -189,7 +201,7 @@ and open the template in the editor.
                     iconClass: 'icon-announcement',
                     padding: 20,
                     overlayClose: false,
-                    width: 600,
+                    width: 500,
                     autoOpen: false,
                     overlayColor: 'rgba(0, 0, 0, 0.6)',
                     onOpened: function () {
@@ -206,7 +218,7 @@ and open the template in the editor.
                     iconClass: 'icon-announcement',
                     padding: 30,
                     overlayClose: false,
-                    width: 600,
+                    width: 400,
                     autoOpen: false,
                     overlayColor: 'rgba(0, 0, 0, 0.6)',
                     onOpened: function () {
@@ -216,7 +228,8 @@ and open the template in the editor.
                         console.log('onClosed');
                     }
                 });
-                
+
+
                 $("#trend-target").iziModal({
                     title: "乐晒`查看动态",
                     iconClass: 'icon-announcement',
@@ -226,32 +239,7 @@ and open the template in the editor.
                     autoOpen: false,
                     overlayColor: 'rgba(0, 0, 0, 0.6)',
                     onOpened: function () {
-                        Connector({
-                            url: "TotalServer",
-                            params: {
-                                type: "TREND_GETINFO",
-                                data: {
-                                    userid: sessionStorage["userid"],
-                                    stnum: 0,
-                                    endnum: 20
-                                }
-                            },
-                            success: function (json) {
-                                var datas = json.data.TrendList[0];
-//                                for(var i = 0; i < datas.length; i++){
-//                                    var data = datas[i];
-//                                    
-//                                    setontrend(data.trendid, data.content, data.images, data.viewname, data.pick, data.publictime);
-//                                }
-                                $('.pick').find('i').on('click', function(){
-                                    var thumb = $(this).parent().find('span');
-                                    alert(thumb.text);
-                                });
-                            },
-                            failure: function () {
 
-                            }
-                        });
                     }
                 });
             }
@@ -260,9 +248,11 @@ and open the template in the editor.
              * 地图上选取点
              * @returns {}
              */
+            isfbopen = true;
             function SetSen()
             {
-
+                $('#fb-target').iziModal('close', this);
+                isfbopen = false;
             }
 
             function trigger_open_new()
@@ -286,40 +276,75 @@ and open the template in the editor.
                 window.location.href = "index.html";
             }
 
-
+            /**
+             * 根据动态的数据生成显示
+             * @param {type} tid
+             * @param {type} content
+             * @param {type} images
+             * @param {type} viewname
+             * @param {type} picks
+             * @param {type} pubtime
+             * @returns {undefined}
+             */
             function setontrend(tid, content, images, viewname, picks, pubtime)
             {
-                var tr = $('div').addClass('trend');
+                var tr = $('<div>').addClass('trend');
                 tr.append($('<p class="text-primary">' + content + '</p>'));
 
                 // tupian
-                var imgdiv = $('<div>').addClass('imagesdiv');
-                var imgs = $('div').addClass('row');
-                for (var i = 0; i < images.length; i++) {
+                var imgdiv = $('<div>').addClass('imagesdiv').appendTo(tr);
+                var imgs = $('<div>').addClass('row').appendTo(imgdiv);
+                for (var i = 0; i < images[0].length; i++) {
                     var html = '<div class="col-xs-6 col-md-4 trendimg">'
                             + '    <a class="thumbnail">'
-                            + '        <img src="' + images[i] + '" class="img-thumbnail">'
+                            + "        <img src='data:image/jpeg;base64," + images[0][i] + "' class='img-thumbnail'>"
                             + '    </a>'
                             + '</div>';
                     imgs.append($(html));
                 }
-                imgdiv.append(imgs);
-                tr.append(imgdiv);
                 // dianzan
-                var pickdiv = $('div').addClass('pickdiv');
+                var pickdiv = $('<div>').addClass('pickdiv').appendTo(tr);
                 var ht = '<div class="publictime" style="">'
-                       + '    <a>' + pubtime + '</a>'
-                       + '    <div class="pick">'
-                       + '        <i class=" fa fa-fw fa-lg fa-thumbs-up"></i>'
-                       + '        <span>' + picks + '</span>'
-                       + '    </div>'
-                       + '</div>';
-               
-               pickdiv.append($(ht));
-               tr.append(pickdiv);
-                $('#trendsdiv').append(tr);
+                        + '    <a>' + pubtime + '</a>'
+                        + '    <div class="pick">'
+                        + '        <i class=" fa fa-fw fa-lg fa-thumbs-up"></i>'
+                        + '        <span>' + picks + '</span>'
+                        + '    </div>'
+                        + '</div>';
+
+                pickdiv.append($(ht));
+                tr.appendTo($('#trendsdiv'));
             }
 
+            function fbdongtai()
+            {
+                var content = $('#inputNote').val();
+                if (content === '') {
+                    
+                    return ;
+                }
+                pos = new Coordtransform().bd09towgs84(pos[0], pos[1]);;
+                Connector({
+                    url: "TotalServer",
+                    params: {
+                        type: "TREND_SETINFO",
+                        data: {
+                            userid: sessionStorage["userid"],
+                            content: content,
+                            viewname: $("#scenname").val(),
+                            postion: "POINT(" + pos[0] + " " + pos[1] + ")"
+                        }
+                    },
+                    success: function (json) {
+                        var cont = json;
+                        $('#inputNote').val('');
+                        $("#scenname").val('');
+                    },
+                    failure: function () {
+
+                    }
+                });
+            }
         </script>
     </head>
     <body>
@@ -403,7 +428,7 @@ and open the template in the editor.
                 </div>
                 <br/>
                 <div class="row">
-                    <button type="button" class="btn btn-info">发布</button>
+                    <button type="button" class="btn btn-info" onclick="fbdongtai()">发布</button>
                 </div>
             </div>
         </div>
@@ -526,7 +551,7 @@ and open the template in the editor.
 
         <div id="trend-target" class="form-bottom" style="min-height: 400px;">
             <div id="trendsdiv">
-                <div class="trend">
+<!--                <div class="trend">
                     <p class="text-primary">测试动态15456464156487846351564864521545642154</p>
 
                     <div class="imagesdiv">
@@ -572,7 +597,7 @@ and open the template in the editor.
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>-->
             </div>
         </div>
     </body>

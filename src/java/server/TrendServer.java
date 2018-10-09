@@ -71,7 +71,33 @@ public class TrendServer extends connectPG {
     
     private void settrend()
     {
-        
+        try {
+            String sqlstr = "insert into"
+                    + "  trend(trendid, userid, content, viewname, tposition)"
+                    + "  values(nextval('public.trend_trendid_seq'),?, ?, ?, ST_GeomFromText(?,4326)) returning trendid;";
+            PreparedStatement st = _connection.prepareStatement(sqlstr);
+            st.setInt(1, _data.getInt("userid"));
+            st.setString(2, _data.getString("content"));
+            st.setString(3, _data.getString("viewname"));
+            st.setString(4, _data.getString("postion"));
+
+            // st.execute();
+            ResultSet rs = st.executeQuery();
+            int id = 0;
+            if (rs.next() != false) {
+                id = rs.getInt("trendid");
+            }
+            String altersql = "update public.trend set images='/web/image/userDynamic/?' where trendid=?;";
+            PreparedStatement ast = _connection.prepareStatement(altersql);
+            ast.setInt(1, id);
+            ast.setInt(2, id);
+            ast.execute();
+            JSONObject f = new JSONObject();
+            f.put("trendid", id);
+            setResponse(true, "发布成功！", f);
+        } catch (SQLException | JSONException e) {
+             Logger.getLogger(getPoint.class.getName()).log(Level.SEVERE, null, e);
+        }
     }
 }
 

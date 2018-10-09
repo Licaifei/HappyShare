@@ -69,7 +69,7 @@ MapControl.prototype._initBKmap = function () {
 MapControl.prototype.initbaidumap = function () {
     var me = this;
     me.bkmap = new BMap.Map(me.bkmapID);          // 创建地图实例  
-    me.panorama = new BMap.Panorama(me.bkmapID); 
+    me.panorama = new BMap.Panorama(me.bkmapID);
     me.panorama.setPov({heading: -40, pitch: 6});   //创建全景地图
     var mycenter = me.opts.center;
 
@@ -84,12 +84,22 @@ MapControl.prototype.initbaidumap = function () {
     me.bkmap.addControl(new BMap.MapTypeControl());
 //    me.bkmap.setCurrentCity("北京"); // 仅当设置城市信息时，MapTypeControl的切换功能才能可用
 
-    if(me.opts.type === "index")
+    if (me.opts.type === "index")
     {
         me.getPointsInfo();
-    }
-    else {
+    } else {
         me.getTrendInfo();
+        me.bkmap.addEventListener("click", function (e) {
+            pos[0] = e.point.lng;
+            pos[1] = e.point.lat;
+            console.log(pos[0] + ', ' + pos[1]);
+            $('#scenname').val(pos[0] + ',' + pos[1]);
+            if (!isfbopen)
+            {
+                $('#fb-target').iziModal('open', this);
+                isfbopen = true;
+            }
+        });
     }
 };
 
@@ -107,7 +117,7 @@ MapControl.prototype.getPointsInfo = function () {
         method: "POST",
         success: function (data) {
             var json = JSON.parse(data);
-            if(json.success === true){
+            if (json.success === true) {
                 this.information = json.data.geoList[0];
                 me.showPoint(this.information);
             }
@@ -118,11 +128,11 @@ MapControl.prototype.getPointsInfo = function () {
     });
 };
 
-MapControl.prototype.getTrendInfo = function() 
+MapControl.prototype.getTrendInfo = function ()
 {
     var me = this;
     var userid = sessionStorage["userid"];
-    if(typeof(userid) === "undefined")
+    if (typeof (userid) === "undefined")
         return;
     $.ajax({
         url: "TotalServer",
@@ -130,14 +140,14 @@ MapControl.prototype.getTrendInfo = function()
             request: JSON.stringify({
                 type: "Point_Trend",
                 data: {
-                    userid : userid
+                    userid: userid
                 }
             })
         },
         method: "POST",
         success: function (data) {
             var json = JSON.parse(data);
-            if(json.success === true){
+            if (json.success === true) {
                 this.information = json.data.geoList[0];
                 me.showTrendPoint(this.information);
             }
@@ -152,7 +162,7 @@ MapControl.prototype.getTrendInfo = function()
  * @param {json} information
  * @returns {}
  */
-MapControl.prototype.showTrendPoint = function(information)
+MapControl.prototype.showTrendPoint = function (information)
 {
     var me = this;
     me.trendinformation = information;
@@ -161,19 +171,19 @@ MapControl.prototype.showTrendPoint = function(information)
     me.addTrendPointToMap();
 };
 
-MapControl.prototype.addTrendPointToMap = function(){
+MapControl.prototype.addTrendPointToMap = function () {
     var me = this;
     me.BDTrendPointMaker = [];
-    for(var i = 0; i < this.trendpoints.length; i++) {
+    for (var i = 0; i < this.trendpoints.length; i++) {
         var scenicName = me.trendinformation[i].content[0];
         var pt = new BMap.Point(this.trendpoints[i][0], this.trendpoints[i][1]);
-        var myIcon = new BMap.Icon("image/point-of-interest-32.png", new BMap.Size(32, 32));
+        var myIcon = new BMap.Icon("image/66.png", new BMap.Size(32, 32));
         var marker = new BMap.Marker(pt, {icon: myIcon});  // 创建标注  
 //        marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
         me.bkmap.addOverlay(marker);              // 将标注添加到地图中
-        me.addClickHandler(scenicName,marker);   //添加监听事件    
+        me.addClickHandler(scenicName, marker);   //添加监听事件    
         me.BDTrendPointMaker.push(marker);
-    }   
+    }
 };
 
 /**
@@ -181,7 +191,7 @@ MapControl.prototype.addTrendPointToMap = function(){
  * @param {json} information
  * @returns {}
  */
-MapControl.prototype.showPoint = function(information) {
+MapControl.prototype.showPoint = function (information) {
     var me = this;
     me.information = information;
 
@@ -189,19 +199,19 @@ MapControl.prototype.showPoint = function(information) {
     me.addPointToMap();
 };
 
-MapControl.prototype.addPointToMap = function(){
+MapControl.prototype.addPointToMap = function () {
     var me = this;
     me.BDPointMaker = [];
-    for(var i = 0; i < this.points.length; i++) {
+    for (var i = 0; i < this.points.length; i++) {
         var scenicName = me.information[i].scenicname[0];
         var pt = new BMap.Point(this.points[i][0], this.points[i][1]);
         var myIcon = new BMap.Icon("image/point-of-interest-32.png", new BMap.Size(32, 32));
         var marker = new BMap.Marker(pt, {icon: myIcon});  // 创建标注  
 //        marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
         me.bkmap.addOverlay(marker);              // 将标注添加到地图中
-        me.addClickHandler(scenicName,marker);   //添加监听事件    
+        me.addClickHandler(scenicName, marker);   //添加监听事件    
         me.BDPointMaker.push(marker);
-    }   
+    }
 };
 
 //处理监听事件
@@ -209,7 +219,7 @@ MapControl.prototype.addClickHandler = function (content, marker) {
     var me = this;
     marker.addEventListener("mouseover", function (e) {
         me.showPointInfo(content, e);
-    });    
+    });
     marker.addEventListener("mouseout", function (e) {
         me.delPointInfo(e);
     });
@@ -218,20 +228,20 @@ MapControl.prototype.addClickHandler = function (content, marker) {
     });
 };
 
-MapControl.prototype.bdPanorama = function(e) {
+MapControl.prototype.bdPanorama = function (e) {
     var me = this;
     var p = e.target;
     var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
-    me.panorama.setPosition(point); 
+    me.panorama.setPosition(point);
     me.panorama.show();
 };
 
-MapControl.prototype.delPointInfo = function(e) {
+MapControl.prototype.delPointInfo = function (e) {
     var me = this;
     me.bkmap.closeInfoWindow();
 };
 
-MapControl.prototype.showPointInfo = function(content, e){
+MapControl.prototype.showPointInfo = function (content, e) {
     //获取点的信息
     var me = this;
     var p = e.target;
@@ -240,14 +250,14 @@ MapControl.prototype.showPointInfo = function(content, e){
     me.bkmap.openInfoWindow(infoWindow, point); //开启信息窗口
 };
 
-MapControl.prototype.handelPointFormat = function(information) {
+MapControl.prototype.handelPointFormat = function (information) {
     var me = this;
     var points = new Array();
-    for (items in information){
+    for (items in information) {
         var geo = information[items].geometry[0];
         var index = geo.indexOf(" ");
-        var lng = parseFloat(geo.substr(6, index-6));
-        var lat = parseFloat(geo.substr(index+1, geo.length-index-2));
+        var lng = parseFloat(geo.substr(6, index - 6));
+        var lat = parseFloat(geo.substr(index + 1, geo.length - index - 2));
         var transform = new Coordtransform();
         var point = transform.bd09towgs84(lng, lat);
         points.push(point);
@@ -255,20 +265,20 @@ MapControl.prototype.handelPointFormat = function(information) {
     return points;
 };
 
-MapControl.prototype.searchByPology = function(cityName){
+MapControl.prototype.searchByPology = function (cityName) {
     var me = this;
-    for(var i = 0; i < me.points.length; i++){
+    for (var i = 0; i < me.points.length; i++) {
         var flag = me.inOrOutPology(me.points[i], me.ply);
-        if(flag === true){
+        if (flag === true) {
             me.BDPointMaker[i].setAnimation(BMAP_ANIMATION_BOUNCE);
         }
     }
 };
 
-MapControl.prototype.pologyByCityName = function(cityName) {
+MapControl.prototype.pologyByCityName = function (cityName) {
     var me = this;
     var bdary = new BMap.Boundary();
-    bdary.get(cityName, function(rs) { //获取行政区域
+    bdary.get(cityName, function (rs) { //获取行政区域
         me.bkmap.clearOverlays(); //清除地图覆盖物    
         me.addPointToMap();
         var count = rs.boundaries.length; //行政区域的点有多少个
@@ -283,17 +293,17 @@ MapControl.prototype.pologyByCityName = function(cityName) {
                 strokeColor: "#ff0000"
             }); //建立多边形覆盖物
             me.bkmap.addOverlay(ply); //添加覆盖物
-            pointArray = pointArray.concat(ply.getPath());     
+            pointArray = pointArray.concat(ply.getPath());
         }
         var pts = [];
-        for(var i = 0; i < pointArray.length; i++)
+        for (var i = 0; i < pointArray.length; i++)
             pts.push(pointArray[i]);
-        me.ply= new BMap.Polygon(pts);
+        me.ply = new BMap.Polygon(pts);
         me.searchByPology();
     });
 };
 
-MapControl.prototype.inOrOutPology = function(point, ply){
+MapControl.prototype.inOrOutPology = function (point, ply) {
     var pt = new BMap.Point(point[0], point[1]);
     var result = BMapLib.GeoUtils.isPointInPolygon(pt, ply);
     return result;

@@ -45,8 +45,8 @@ public class operatPicture {
     
     //返回一个文件夹下的所有图片
     protected List<String> getPictures(){
-//        File file = new File(pictureFileStr);//文件夹路径
-        File file = new File("home/fei/NetBeansProjects/HappyShare/web/image/userDynamic/1/");
+        File file = new File(pictureFileStr);//文件夹路径
+        //File file = new File("home/fei/NetBeansProjects/HappyShare/web/image/userDynamic/1/");
         File[] files = file.listFiles();//遍历该文件夹
         List<String> picturesPath = new ArrayList<>();
         if(null!=files)

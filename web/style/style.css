@@ -1170,7 +1170,7 @@ dl{
 {
     background: #dbdbdb;
     padding: 10px;
-    margin: 5px;
+    margin: 25px 5px;
     box-shadow: darkgrey 2px 2px 3px 5px;
 }
 
@@ -1185,7 +1185,7 @@ dl{
     width: auto;
     max-width: 200px;
     height: 100%;
-    border: solid 0.1em black;
+/*    border: solid 0.1em black;*/
     margin: 10px;
 }
 
